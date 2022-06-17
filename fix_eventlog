@@ -1,0 +1,16 @@
+@echo off	
+
+if /i "%processor_architecture%"=="x86" (sc query "Sysmon" | Find /i "Running" >nul) else (sc query "Sysmon64" | Find /i "Running" >nul)
+If %ERRORLEVEL% EQU 0 (goto checkjournal)
+
+:checkjournal
+wevtutil gl Microsoft-Windows-Sysmon/Operational
+if %errorlevel% EQU 0 (goto  changejournal) else (changejournal)
+
+:changejournal
+wevtutil sl Microsoft-Windows-Sysmon/Operational /ms:262144000
+wevtutil cl Microsoft-Windows-Sysmon/Operational
+wevtutil sl Microsoft-Windows-Sysmon/Operational /ms:131072000
+goto exitscript
+
+:exitscript
